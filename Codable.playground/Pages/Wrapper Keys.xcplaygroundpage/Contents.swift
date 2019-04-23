@@ -5,7 +5,7 @@ let json = """
     "work": {
         "id": 2422333,
         "popularity": null,
-      
+        "sponsor": "Publisher Inc.",
         "books_count": 222,
         "ratings_count": 860687,
         "text_reviews_count": 37786,
@@ -122,7 +122,7 @@ extension SearchResult: Encodable {
         try innerContainer.encode(bestBook, forKey: .bestBook)
         try innerContainer.encode(candidates, forKey: .candidates)
         try innerContainer.encode(popularity, forKey: .popularity)
-        try innerContainer.encode(sponsor, forKey: .sponsor)
+        try innerContainer.encodeIfPresent(sponsor, forKey: .sponsor)
     }
 }
 
