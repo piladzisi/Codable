@@ -4,7 +4,7 @@ let json = """
 {
     "title": "Harry Potter and the sorcerer's stone",
     "url": "https:\\/\\/openlibrary.org\\/books\\/OL26331930M\\/Harry_Potter_and_the_sorcerer's_stone",
-    "publish_date": "1997-06-26T00:00:00+0000",
+    "publish_date": "June 26, 1997",
     "text": "VGhpcyBpc24ndCByZWFsbHkgdGhlIGNvbnRlbnRzIG9mIHRoZSBib29r",
     "rating": 4.9
     
@@ -19,7 +19,11 @@ struct Book: Codable {
 
 let decoder = JSONDecoder()
 decoder.keyDecodingStrategy = .convertFromSnakeCase
-decoder.dateDecodingStrategy = .iso8601
+//decoder.dateDecodingStrategy = .iso8601
+
+let formatter = DateFormatter()
+formatter.dateFormat = "MMMM dd, yyyy"
+decoder.dateDecodingStrategy = .formatted(formatter)
 let potter = try! decoder.decode(Book.self, from: json)
 
 potter.title
