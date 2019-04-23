@@ -14,11 +14,12 @@ let json = """
 struct Book: Codable {
     let title: String
     let url: String
-    let publishDate: String
+    let publishDate: Date
 }
 
 let decoder = JSONDecoder()
 decoder.keyDecodingStrategy = .convertFromSnakeCase
+decoder.dateDecodingStrategy = .iso8601
 let potter = try! decoder.decode(Book.self, from: json)
 
 potter.title
