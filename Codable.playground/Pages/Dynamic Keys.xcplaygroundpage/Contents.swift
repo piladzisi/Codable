@@ -32,10 +32,26 @@ let json = """
 }
 """.data(using: .utf8)!
 
-struct Language {
+struct Language: Decodable {
     let name: String
     let designer: [String]
     let releaseDate: String
+    
+    enum LanguageCodingKeys: String, CodingKey {
+        case designer
+        case released
+        case name
+    }
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: LanguageCodingKeys.self)
+        guard let name = container.codingPath.first else {
+            let context = DecodingError.Context.init(codingPath: container.codingPath, debugDescription: "dynamic language key not found")
+            throw DecodingError.keyNotFound(LanguageCodingKeys.name, context)
+        }
+        self.name = name.stringValue
+        self.designer = try container.decode([String].self, forKey: .designer)
+        self.releaseDate = try container.decode(String.self, forKey: .released)
+    }
 }
 
 struct Library {
@@ -68,15 +84,7 @@ extension Library: Decodable {
         let languagesContainer = try container.nestedContainer(keyedBy: LibraryCodingKeys.self, forKey: .languages)
         
         self.languages = try languagesContainer.allKeys.map { key in
-             let languageContainer = try languagesContainer.nestedContainer(keyedBy: LanguageCodingKeys.self, forKey: key)
-            
-            let languageName = key.stringValue
-            let designer = try languageContainer.decode([String].self, forKey: .designer)
-            let releaseDate = try languageContainer.decode(String.self, forKey: .released)
-            
-            return Language(name: languageName, designer: designer, releaseDate: releaseDate)
-            
-            
+            return try languagesContainer.decode(Language.self, forKey: key)
         }
     }
 }
