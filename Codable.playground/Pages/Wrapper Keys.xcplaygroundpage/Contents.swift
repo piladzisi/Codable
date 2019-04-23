@@ -4,7 +4,8 @@ let json = """
 {
     "work": {
         "id": 2422333,
-        "popularity": 3.8,
+        "popularity": null,
+      
         "books_count": 222,
         "ratings_count": 860687,
         "text_reviews_count": 37786,
@@ -54,6 +55,7 @@ struct SearchResult{
     let bestBook: Book
     let candidates: [Book]
     let popularity: Double?
+    let sponsor: String?
     
     enum OuterCodingKeys: String, CodingKey {
         case work
@@ -67,6 +69,7 @@ struct SearchResult{
         case bestBook
         case candidates
         case popularity
+        case sponsor
     }
 }
 
@@ -94,6 +97,7 @@ extension SearchResult: Decodable {
         self.bestBook = try innerContainer.decode(Book.self, forKey: .bestBook)
         self.candidates = try innerContainer.decode([Book].self, forKey: .candidates)
         self.popularity = try innerContainer.decode(Double?.self, forKey: .popularity)
+        self.sponsor = try innerContainer.decodeIfPresent(String.self, forKey: .sponsor)
     }
 }
 
@@ -104,6 +108,7 @@ let result = try! decoder.decode(SearchResult.self, from: json)
 result.bestBook.title
 result.bestBook.author.name
 result.candidates.count
+result.sponsor
 
 extension SearchResult: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -117,6 +122,7 @@ extension SearchResult: Encodable {
         try innerContainer.encode(bestBook, forKey: .bestBook)
         try innerContainer.encode(candidates, forKey: .candidates)
         try innerContainer.encode(popularity, forKey: .popularity)
+        try innerContainer.encode(sponsor, forKey: .sponsor)
     }
 }
 
