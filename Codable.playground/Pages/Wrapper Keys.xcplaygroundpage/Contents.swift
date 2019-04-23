@@ -4,6 +4,7 @@ let json = """
 {
     "work": {
         "id": 2422333,
+        "popularity": 3.8,
         "books_count": 222,
         "ratings_count": 860687,
         "text_reviews_count": 37786,
@@ -14,8 +15,34 @@ let json = """
                 "id": 589,
                 "name": "Orson Scott Card"
             }
-        }
-    }
+        },
+    "candidates": [
+            {
+                "id": 44687,
+                "title": "Enchanters' End Game (The Belgariad, #5)",
+                "author": {
+                    "id": 8732,
+                    "name": "David Eddings"
+                }
+            },
+            {
+                "id": 22874150,
+                "title": "The End Game",
+                "author": {
+                    "id": 6876994,
+                    "name": "Kate  McCarthy"
+                }
+            },
+            {
+                "id": 7734468,
+                "title": "Ender's Game: War of Gifts",
+                "author": {
+                    "id": 236462,
+                    "name": "Jake Black"
+                }
+            }
+        ]
+  }
 }
 """.data(using: .utf8)!
 
@@ -25,6 +52,8 @@ struct SearchResult{
     let ratingsCount: Int
     let textReviewsCount: Int
     let bestBook: Book
+    let candidates: [Book]
+    let popularity: Double?
     
     enum OuterCodingKeys: String, CodingKey {
         case work
@@ -36,6 +65,8 @@ struct SearchResult{
         case ratingsCount
         case textReviewsCount
         case bestBook
+        case candidates
+        case popularity
     }
 }
 
@@ -61,6 +92,8 @@ extension SearchResult: Decodable {
         self.ratingsCount = try innerContainer.decode(Int.self, forKey: .ratingsCount)
         self.textReviewsCount = try innerContainer.decode(Int.self, forKey: .textReviewsCount)
         self.bestBook = try innerContainer.decode(Book.self, forKey: .bestBook)
+        self.candidates = try innerContainer.decode([Book].self, forKey: .candidates)
+        self.popularity = try innerContainer.decode(Double?.self, forKey: .popularity)
     }
 }
 
@@ -70,6 +103,7 @@ decoder.keyDecodingStrategy = .convertFromSnakeCase
 let result = try! decoder.decode(SearchResult.self, from: json)
 result.bestBook.title
 result.bestBook.author.name
+result.candidates.count
 
 extension SearchResult: Encodable {
     public func encode(to encoder: Encoder) throws {
@@ -81,10 +115,47 @@ extension SearchResult: Encodable {
         try innerContainer.encode(ratingsCount, forKey:.ratingsCount)
         try innerContainer.encode(textReviewsCount, forKey:.textReviewsCount)
         try innerContainer.encode(bestBook, forKey: .bestBook)
+        try innerContainer.encode(candidates, forKey: .candidates)
+        try innerContainer.encode(popularity, forKey: .popularity)
     }
 }
 
 let encoder = JSONEncoder()
 encoder.keyEncodingStrategy = .convertToSnakeCase
+encoder.outputFormatting = .prettyPrinted
 let resultEncode = try! encoder.encode(result).stringDescription
 print(resultEncode)
+
+
+let candidatesJson = """
+{
+"candidates": [
+{
+"id": 44687,
+"title": "Enchanters' End Game (The Belgariad, #5)",
+"author": {
+"id": 8732,
+"name": "David Eddings"
+}
+},
+{
+"id": 22874150,
+"title": "The End Game",
+"author": {
+"id": 6876994,
+"name": "Kate  McCarthy"
+}
+},
+{
+"id": 7734468,
+"title": "Ender's Game: War of Gifts",
+"author": {
+"id": 236462,
+"name": "Jake Black"
+}
+}
+]
+}
+""".data(using: .utf8)!
+
+let candidates = try! decoder.decode([String: [Book]].self, from: candidatesJson)
